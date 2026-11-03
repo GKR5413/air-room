@@ -1,0 +1,18 @@
+# dependencies & build output
+node_modules
+.next
+out
+*.tsbuildinfo
+next-env.d.ts
+
+# secrets: never commit real keys (the blank template .env.example IS committed)
+.env
+.env.*
+!.env.example
+
+# deploy tooling
+.vercel
+
+# os / editor / logs
+.DS_Store
+npm-debug.log*
