@@ -93,10 +93,15 @@ alter table room_bans enable row level security;
 alter table reports enable row level security;
 alter table moderation_actions enable row level security;
 -- Auto-create a profile on signup
-create function handle_new_user() returns trigger language plpgsql security definer as $$
+-- Schema-qualified + fixed search_path: Supabase Auth runs this trigger with a
+-- different search_path, so an unqualified "profiles" fails with
+-- "Database error saving new user".
+create function public.handle_new_user() returns trigger
+language plpgsql security definer set search_path = public as $$
 begin
-  insert into profiles(id, display_name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email,'@',1)));
+  insert into public.profiles(id, display_name)
+  values (new.id, coalesce(nullif(new.raw_user_meta_data->>'display_name', ''), split_part(new.email,'@',1)))
+  on conflict (id) do nothing;
   return new;
 end $$;
 create trigger on_auth_user_created after insert on auth.users
