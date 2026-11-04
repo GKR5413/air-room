@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { TrackSource } from 'livekit-server-sdk';
 import { admin } from '@/lib/supabase-admin';
 import { route, getIdentity, withGuestCookie, fail } from '@/lib/auth';
-import { getRoomBySlug, getRole, isMod, isBanned } from '@/lib/rooms';
+import { getRoomBySlug, getRole, isMod, isBanned, ensureModerator } from '@/lib/rooms';
 import { listParticipants } from '@/lib/livekit';
 import { namesFor } from '@/lib/api';
 import type { RoomState, StageMember, Role } from '@/lib/types';
@@ -14,16 +14,29 @@ export const GET = route<{ params: Promise<{ slug: string }> }>(async (req, { pa
   const { identity, newGuestCookie } = await getIdentity(req);
   const room = await getRoomBySlug(slug);
   if (!identity.isGuest && (await isBanned(room.id, identity.id))) fail(403, 'You have been removed from this room');
-  const role = await getRole(room, identity.id, identity.isGuest);
+  let role = await getRole(room, identity.id, identity.isGuest);
 
   const [parts, memRes] = await Promise.all([
     room.status === 'live' ? listParticipants(room.slug) : Promise.resolve([]),
-    admin.from('room_memberships').select('user_id, role').eq('room_id', room.id).neq('role', 'listener'),
+    admin.from('room_memberships').select('user_id, role, updated_at').eq('room_id', room.id).neq('role', 'listener'),
   ]);
   const roles = new Map<string, Role>((memRes.data ?? []).map((m: any) => [m.user_id, m.role as Role]));
   roles.set(room.host_id, 'host');
   const connected = new Map(parts.map((p) => [p.identity, p]));
   const stageIds = [...roles.keys()].filter((id) => connected.has(id));
+
+  // Succession: if the host and every moderator are gone, a speaker steps up.
+  if (room.status === 'live') {
+    const leaderOnline = stageIds.some((id) => isMod(roles.get(id)!));
+    const speakers = (memRes.data ?? [])
+      .filter((m: any) => m.role === 'speaker' && connected.has(m.user_id))
+      .map((m: any) => ({ id: m.user_id as string, since: m.updated_at as string }));
+    const promoted = await ensureModerator(room, leaderOnline, speakers);
+    if (promoted) {
+      roles.set(promoted, 'moderator');
+      if (promoted === identity.id) role = 'moderator';
+    }
+  }
 
   const mods = isMod(role);
   const handsRes = mods

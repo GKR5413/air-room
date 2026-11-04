@@ -6,6 +6,8 @@ export interface RoomRow {
   id: string; slug: string; host_id: string; title: string; description: string;
   topic: string; language: string; visibility: Visibility; status: RoomStatus;
   hands_enabled: boolean; created_at: string; ended_at: string | null;
+  /** Last time a host/moderator was seen connected (drives moderator succession). */
+  leader_seen_at?: string | null;
 }
 
 export interface Identity { id: string; name: string; isGuest: boolean }

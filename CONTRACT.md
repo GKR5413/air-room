@@ -19,4 +19,5 @@ GET/POST /api/me                     user. GET profile; POST {display_name}
 Moderate rules: invite (target must have pending hand or be listener; creates stage_invitation, marks hand invited; not for banned/guest);
 mute (speaker/mod target; muteParticipant only, role unchanged); to_audience (role listener, setParticipantRole, not host);
 remove (ban insert + kick + role reset + log); appoint_mod/remove_mod/transfer_host host only; pause/resume_hands mod.
+Succession: GET state also promotes. If no host/moderator has been connected for 30s and a speaker is on stage, the longest-serving connected speaker becomes moderator (logged as auto_promote_mod; rooms.leader_seen_at, migration 0003). The returning host regains host automatically.
 Every action calls logAction. Moderators cannot act on host; mods cannot act on other mods except host.

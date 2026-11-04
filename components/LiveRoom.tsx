@@ -115,6 +115,13 @@ export default function LiveRoom({ slug, onLeave }: { slug: string; onLeave: () 
     if (!stateRole || !tokenRole.current || stateRole === tokenRole.current || ended || blockedMsg) return;
     const wasStage = tokenRole.current !== 'listener';
     const nowStage = stateRole !== 'listener';
+    if (wasStage === nowStage) {
+      // Host, moderator and speaker share the same publish rights and the server has already
+      // updated this live connection, so don't reconnect (that would cut the mic).
+      if (stateRole === 'moderator' && tokenRole.current === 'speaker') toast('You’re now a moderator. You can manage the stage and hands.', 'ok');
+      tokenRole.current = stateRole;
+      return;
+    }
     (async () => {
       if (wasStage && !nowStage) {
         try { await roomRef.current?.localParticipant.setMicrophoneEnabled(false); } catch { /* ignore */ }
@@ -122,7 +129,7 @@ export default function LiveRoom({ slug, onLeave }: { slug: string; onLeave: () 
       }
       await connect();
     })();
-  }, [stateRole, ended, blockedMsg, connect]);
+  }, [stateRole, ended, blockedMsg, connect, toast]);
 
   useEffect(() => {
     if (ended) disconnect();
