@@ -2,14 +2,16 @@ import { admin } from '@/lib/supabase-admin';
 import { route, requireUser, fail } from '@/lib/auth';
 import { getRoomBySlug } from '@/lib/rooms';
 import { body, namesFor } from '@/lib/api';
+import { reconcileRoom } from '@/lib/room-lifecycle';
 
 type Ctx = { params: Promise<{ slug: string }> };
 
 export const GET = route<Ctx>(async (_req, { params }) => {
   const { slug } = await params;
-  const room = await getRoomBySlug(slug);
+  const { room } = await reconcileRoom(await getRoomBySlug(slug));
   const names = await namesFor([room.host_id]);
-  return { room, host_name: names[room.host_id] ?? 'User', status: room.status };
+  const { data: host } = await admin.from('profiles').select('avatar_url').eq('id', room.host_id).maybeSingle();
+  return { room, host_name: names[room.host_id] ?? 'User', host_avatar_url: host?.avatar_url, status: room.status };
 });
 
 export const PATCH = route<Ctx>(async (req, { params }) => {

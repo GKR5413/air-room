@@ -11,23 +11,22 @@
   border-radius: var(--r-pill);
   border: 1px solid var(--btn-bd);
   background: var(--btn-bg); color: var(--btn-fg);
-  font-weight: 600; font-size: 15px; line-height: 1; white-space: nowrap;
+  font-weight: 700; font-size: 15px; line-height: 1; white-space: nowrap;
   text-decoration: none;
-  transition: transform 0.25s var(--ease), background 0.2s, border-color 0.2s, box-shadow 0.3s, opacity 0.2s;
+  transition: transform 0.2s var(--ease), background 0.2s, border-color 0.2s, opacity 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-.btn:hover { --btn-bg: var(--surface-3); transform: translateY(-1px); }
+.btn:hover { --btn-bg: var(--surface-3); }
 .btn:active { transform: translateY(0) scale(0.98); }
 .btn:disabled, .btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; transform: none; }
 .btn svg { flex: none; }
 
 .btn-primary {
-  --btn-bg: linear-gradient(180deg, var(--accent-hi), var(--accent));
+  --btn-bg: var(--accent);
   --btn-fg: var(--on-accent);
   --btn-bd: transparent;
-  box-shadow: var(--shadow-accent), 0 1px 0 rgb(255 255 255 / 0.25) inset;
 }
-.btn-primary:hover { --btn-bg: linear-gradient(180deg, var(--accent-hi), var(--accent-hi)); box-shadow: 0 14px 34px -8px color-mix(in oklab, var(--accent) 70%, transparent), 0 1px 0 rgb(255 255 255 / 0.3) inset; }
+.btn-primary:hover { --btn-bg: var(--accent-hi); }
 .btn-ghost { --btn-bg: transparent; --btn-bd: transparent; }
 .btn-ghost:hover { --btn-bg: var(--surface-2); }
 .btn-outline { --btn-bg: transparent; --btn-bd: var(--line-strong); }
@@ -70,12 +69,12 @@
 .input:focus, .textarea:focus, .select:focus {
   outline: none; border-color: var(--accent);
   background: var(--surface);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 22%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent);
 }
 .textarea { resize: vertical; min-height: 104px; }
 .select {
   appearance: none; padding-right: 44px; cursor: pointer;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23998d7a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2380808a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
   background-repeat: no-repeat; background-position: right 16px center;
 }
 .select option { background: var(--surface); color: var(--text); }
@@ -94,7 +93,7 @@
 /* ── Segmented control ────────────────────────────────────── */
 .segmented {
   --n: 2; --i: 0;
-  position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr);
+  position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr));
   padding: 4px; border-radius: var(--r-pill);
   background: var(--surface-2); border: 1px solid var(--line);
 }
@@ -123,7 +122,7 @@
   background: var(--surface-2); border: 1px solid var(--line);
   transition: border-color 0.2s, background 0.2s, box-shadow 0.25s, transform 0.25s var(--ease);
 }
-.option:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+.option:hover { border-color: var(--line-strong); }
 .option .ico {
   grid-row: span 2; width: 36px; height: 36px; border-radius: 11px;
   display: grid; place-items: center; background: var(--surface-3); color: var(--text-2);
@@ -182,8 +181,8 @@
   background: color-mix(in oklab, var(--danger) 14%, transparent);
   color: var(--danger); border-color: color-mix(in oklab, var(--danger) 32%, transparent);
 }
-button.chip { cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s var(--ease); height: 34px; padding: 0 14px; font-size: 13.5px; }
-button.chip:hover { border-color: var(--line-strong); color: var(--text); transform: translateY(-1px); }
+button.chip { cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s; height: 36px; padding: 0 14px; font-size: 13.5px; }
+button.chip:hover { border-color: var(--line-strong); color: var(--text); }
 button.chip[aria-pressed="true"] {
   background: var(--text); color: var(--bg); border-color: transparent;
 }
@@ -191,13 +190,13 @@ button.chip[aria-pressed="true"] {
 .live-badge {
   display: inline-flex; align-items: center; gap: 8px; height: 26px; padding: 0 11px 0 10px;
   border-radius: var(--r-pill);
-  font-size: 11.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--accent-text);
-  background: color-mix(in oklab, var(--accent) 14%, transparent);
-  border: 1px solid color-mix(in oklab, var(--accent) 32%, transparent);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--live);
+  background: color-mix(in oklab, var(--live) 10%, transparent);
+  border: 1px solid color-mix(in oklab, var(--live) 26%, transparent);
 }
 .live-badge::before {
-  content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); color: var(--accent);
+  content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--live); color: var(--live);
   animation: pulse-dot 1.8s infinite;
 }
 .live-badge.ended { color: var(--text-3); background: var(--surface-2); border-color: var(--line); }
@@ -207,13 +206,12 @@ button.chip[aria-pressed="true"] {
 .avatar {
   --size: 40px;
   flex: none; display: inline-grid; place-items: center;
-  width: var(--size); height: var(--size); border-radius: 50%;
-  font-family: var(--font-ui); font-weight: 700; font-size: calc(var(--size) * 0.37); letter-spacing: -0.02em;
-  color: oklch(0.26 0.06 var(--h1));
-  background:
-    radial-gradient(120% 120% at 18% 8%, oklch(0.9 0.1 var(--h1)) 0%, transparent 55%),
-    linear-gradient(145deg, oklch(0.8 0.14 var(--h1)), oklch(0.66 0.17 var(--h2)));
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.14) inset, 0 6px 16px -6px oklch(0.5 0.15 var(--h1) / 0.7);
+  width: var(--size); height: var(--size); border-radius: var(--r-avatar);
+  font-family: var(--font-ui); font-weight: 800; font-size: calc(var(--size) * 0.37); letter-spacing: -0.02em;
+  color: var(--text);
+  /* Neutral, with only a faint per-person tint so people stay distinguishable. */
+  background: color-mix(in oklab, oklch(0.62 0.1 var(--h1)) 20%, var(--surface-3));
+  box-shadow: 0 0 0 1px var(--line) inset;
   user-select: none;
 }
 
@@ -239,15 +237,14 @@ button.chip[aria-pressed="true"] {
 .alert-error svg { color: var(--danger); }
 .alert-ok { background: color-mix(in oklab, var(--ok) 11%, transparent); border-color: color-mix(in oklab, var(--ok) 34%, transparent); }
 .alert-ok svg { color: var(--ok); }
-.alert-info { background: color-mix(in oklab, var(--amber) 10%, transparent); border-color: color-mix(in oklab, var(--amber) 30%, transparent); }
-.alert-info svg { color: var(--amber); }
+.alert-info { background: color-mix(in oklab, var(--accent) 8%, transparent); border-color: color-mix(in oklab, var(--accent) 24%, transparent); }
+.alert-info svg { color: var(--accent-text); }
 
 /* ── Cards / surfaces ─────────────────────────────────────── */
 .card {
-  background: linear-gradient(180deg, var(--surface), color-mix(in oklab, var(--surface) 70%, var(--bg-soft)));
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-1);
 }
 .card-pad { padding: clamp(20px, 3vw, 32px); }
 
@@ -271,7 +268,7 @@ button.chip[aria-pressed="true"] {
 .overlay {
   position: fixed; inset: 0; z-index: 200;
   display: grid; place-items: center; padding: 20px;
-  background: var(--scrim); backdrop-filter: blur(8px);
+  background: var(--scrim);
   animation: fade 0.25s ease both;
 }
 .modal {
@@ -288,7 +285,7 @@ button.chip[aria-pressed="true"] {
   background: color-mix(in oklab, var(--accent) 14%, transparent); color: var(--accent-text);
 }
 .modal-head .ico.danger { background: color-mix(in oklab, var(--danger) 14%, transparent); color: var(--danger); }
-.modal-title { font-family: var(--font-display); font-size: 28px; line-height: 1.05; letter-spacing: -0.01em; }
+.modal-title { font-family: var(--font-display); font-size: 21px; font-weight: 650; line-height: 1.2; letter-spacing: -0.02em; }
 .modal-desc { margin-top: 6px; font-size: 14.5px; color: var(--text-2); }
 .modal-close { position: absolute; top: 16px; right: 16px; }
 .modal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; margin-top: 24px; }
@@ -337,3 +334,15 @@ button.chip[aria-pressed="true"] {
 .menu-item:hover, .menu-item:focus-visible { background: var(--surface-2); outline: none; }
 .menu-item.danger, .menu-item.danger svg { color: var(--danger); }
 .menu-sep { height: 1px; background: var(--line); margin: 6px 4px; }
+
+/* Incoming room pings are available on every page, including minimized rooms. */
+.room-ping {
+  position: fixed; z-index: 180; top: calc(76px + env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right));
+  width: min(410px, calc(100vw - 32px)); padding: 16px;
+  box-shadow: var(--shadow-2); border: 1px solid var(--line-strong);
+}
+.room-ping-message { display: flex; align-items: center; gap: 12px; }
+.room-ping-copy { display: grid; gap: 4px; min-width: 0; font-size: 14px; }
+.room-ping-copy > b { font-size: 16px; overflow-wrap: anywhere; }
+.room-ping-actions { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.room-ping-actions .icon-btn { margin-left: auto; }

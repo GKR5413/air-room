@@ -3,12 +3,13 @@ import { admin } from '@/lib/supabase-admin';
 import { route, getIdentity, withGuestCookie, fail } from '@/lib/auth';
 import { getRoomBySlug, getRole, isBanned } from '@/lib/rooms';
 import { mintToken } from '@/lib/livekit';
+import { reconcileRoom } from '@/lib/room-lifecycle';
 import type { JoinResponse } from '@/lib/types';
 
 export const POST = route<{ params: Promise<{ slug: string }> }>(async (req, { params }) => {
   const { slug } = await params;
   const { identity, newGuestCookie } = await getIdentity(req);
-  const room = await getRoomBySlug(slug);
+  const { room } = await reconcileRoom(await getRoomBySlug(slug));
   if (room.status === 'ended') fail(410, 'This room has ended');
   if (!identity.isGuest && (await isBanned(room.id, identity.id))) fail(403, 'You have been removed from this room');
   const role = await getRole(room, identity.id, identity.isGuest);

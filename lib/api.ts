@@ -25,7 +25,8 @@ export const requireLive = (room: RoomRow) => {
 };
 
 export async function endRoom(room: RoomRow) {
-  await admin.from('rooms').update({ status: 'ended', ended_at: new Date().toISOString() }).eq('id', room.id);
+  const { error } = await admin.from('rooms').update({ status: 'ended', ended_at: new Date().toISOString() }).eq('id', room.id).eq('status', 'live');
+  if (error) fail(500, 'Could not end the room');
   await admin.from('stage_invitations').update({ status: 'revoked' }).eq('room_id', room.id).eq('status', 'pending');
   await admin.from('hand_requests').update({ status: 'withdrawn' }).eq('room_id', room.id).eq('status', 'pending');
   await closeRoom(room.slug);

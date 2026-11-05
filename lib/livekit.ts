@@ -44,6 +44,39 @@ export async function closeRoom(roomName: string) {
   try { await lk().deleteRoom(roomName); } catch { /* no active room */ }
 }
 
-export async function listParticipants(roomName: string) {
-  try { return await lk().listParticipants(roomName); } catch { return []; }
+export async function listParticipants(roomName: string, strict = false) {
+  try { return await lk().listParticipants(roomName); } catch (error: any) {
+    // A missing room is empty. A network/auth failure is unknown, never evidence
+    // that the panel has left (ending a room is irreversible).
+    if (strict && error?.code !== 'not_found' && error?.status !== 404) throw error;
+    return [];
+  }
+}
+
+/** Remove only this connection, so a delayed leave cannot kick a newer rejoin. */
+export async function leaveParticipant(roomName: string, identity: string, sid?: string) {
+  try {
+    const participant = await lk().getParticipant(roomName, identity);
+    if (sid && participant.sid !== sid) return false;
+    await lk().removeParticipant(roomName, identity);
+    return true;
+  } catch (error: any) {
+    if (error?.code === 'not_found' || error?.status === 404) return false;
+    throw error;
+  }
+}
+
+/** Name of the LiveKit room that carries one private call. */
+export const callRoomName = (callId: string) => `call-${callId}`;
+
+/** Token for a private 1:1 call. Both people publish microphone and camera. */
+export async function mintCallToken(opts: { callId: string; identity: string; name: string }) {
+  const at = new AccessToken(process.env.LIVEKIT_API_KEY!, process.env.LIVEKIT_API_SECRET!, {
+    identity: opts.identity, name: opts.name, ttl: '3h',
+  });
+  at.addGrant({
+    room: callRoomName(opts.callId), roomJoin: true, canSubscribe: true,
+    canPublish: true, canPublishSources: [TrackSource.MICROPHONE, TrackSource.CAMERA], canPublishData: false,
+  });
+  return at.toJwt();
 }

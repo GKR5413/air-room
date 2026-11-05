@@ -1,19 +1,22 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Instrument_Serif } from 'next/font/google';
+import { Nunito } from 'next/font/google';
 import Providers from '@/components/Providers';
 import Nav from '@/components/Nav';
+import RoomSessionProvider from '@/components/RoomSession';
+import CallProvider from '@/components/CallProvider';
+import RoomInvitationsProvider from '@/components/RoomInvitations';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/ui.css';
 import './styles/pages.css';
 import './styles/room.css';
+import './styles/chat.css';
 
-const sans = Geist({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
-const serif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-serif', display: 'swap' });
+const sans = Nunito({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
 
 export const metadata: Metadata = {
   title: { default: 'AirRoom — live audio rooms', template: '%s · AirRoom' },
-  description: 'Drop into live audio conversations. Listen for free, raise your hand, and take the stage.',
+  description: 'Live audio rooms. Listen free, raise your hand, take the stage.',
 };
 
 export const viewport: Viewport = {
@@ -21,8 +24,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0d0b09' },
-    { media: '(prefers-color-scheme: light)', color: '#f6f1e7' },
+    { media: '(prefers-color-scheme: dark)', color: '#1b1c20' },
+    { media: '(prefers-color-scheme: light)', color: '#f2f3f6' },
   ],
 };
 
@@ -31,16 +34,20 @@ const THEME_SCRIPT = `try{var t=localStorage.getItem('airroom-theme');if(t==='li
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable}`} suppressHydrationWarning>
+    <html lang="en" className={sans.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
-        <div className="ambient" aria-hidden="true"><i /><i /><i /></div>
-        <div className="grain" aria-hidden="true" />
         <Providers>
-          <Nav />
-          {children}
+          <RoomSessionProvider>
+            <CallProvider>
+              <RoomInvitationsProvider>
+                <Nav />
+                {children}
+              </RoomInvitationsProvider>
+            </CallProvider>
+          </RoomSessionProvider>
         </Providers>
       </body>
     </html>

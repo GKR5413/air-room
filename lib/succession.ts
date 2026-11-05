@@ -1,12 +1,12 @@
 /**
  * Moderator succession: pure decision logic (no I/O) so it can be tested in isolation.
  *
- * If no host/moderator has been connected for LEADER_GRACE_MS while a speaker is still
+ * When no host/moderator is connected while a speaker is still
  * on stage, the speaker who has held the stage longest is promoted to moderator.
  */
 
-/** How long a room may go without a connected host/moderator before a speaker steps up. */
-export const LEADER_GRACE_MS = 30_000;
+/** How long a room may go without a connected host/moderator before a speaker steps up. Zero makes succession immediate. */
+export const LEADER_GRACE_MS = 0;
 /** While a leader is present, refresh `leader_seen_at` at most this often (limits writes). */
 export const LEADER_TOUCH_MS = 10_000;
 
@@ -15,7 +15,6 @@ export type Speaker = { id: string; since: string };
 export type Succession =
   | { kind: 'none' }
   | { kind: 'touch' }              // a leader is present: refresh leader_seen_at
-  | { kind: 'start' }              // leaderless but never saw one: start the grace clock
   | { kind: 'promote'; id: string };
 
 const ms = (iso: string) => {
@@ -43,7 +42,7 @@ export function decideSuccession(o: {
 
   const successor = pickSuccessor(o.speakers);
   if (!successor) return { kind: 'none' };
-  if (Number.isNaN(seen)) return { kind: 'start' };
+  if (Number.isNaN(seen)) return { kind: 'promote', id: successor };
   if (o.now - seen < LEADER_GRACE_MS) return { kind: 'none' };
   return { kind: 'promote', id: successor };
 }

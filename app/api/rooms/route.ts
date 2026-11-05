@@ -1,19 +1,32 @@
 import { admin } from '@/lib/supabase-admin';
 import { route, requireUser, fail } from '@/lib/auth';
 import { makeSlug } from '@/lib/rooms';
-import { listParticipants } from '@/lib/livekit';
+import { reconcileRoom } from '@/lib/room-lifecycle';
 import { body, namesFor } from '@/lib/api';
+import { avatarUrl } from '@/lib/avatar';
 
 export const GET = route(async () => {
   const { data } = await admin.from('rooms').select('*').eq('status', 'live').eq('visibility', 'public').order('created_at', { ascending: false });
-  const rooms = data ?? [];
-  const names = await namesFor([...new Set(rooms.map((r: any) => r.host_id))]);
+  const reconciled = (await Promise.all((data ?? []).map(r => reconcileRoom(r)))).filter(r => r.room.status === 'live');
+  const rooms = reconciled.map(r => r.room);
+  const live = reconciled.map(r => r.participants);
+  // Host first, then the other speakers, but only people who are connected right now.
+  const speakerIds = rooms.map((r: any, i: number) => {
+    const connected = new Set(live[i].map(p => p.identity));
+    const ids = [r.host_id, ...reconciled[i].members.map(m => m.user_id)];
+    return [...new Set(ids)].filter(id => connected.has(id)).slice(0, 4);
+  });
+  const people = [...new Set([...rooms.map((r: any) => r.host_id), ...speakerIds.flat()])];
+  const names = await namesFor(people);
+  const { data: profiles } = people.length ? await admin.from('profiles').select('id, avatar_url').in('id', people) : { data: [] };
+  const photos = new Map((profiles ?? []).map(p => [p.id, avatarUrl(p.id, p.avatar_url)]));
   return {
-    rooms: await Promise.all(rooms.map(async (r: any) => ({
+    rooms: rooms.map((r: any, i: number) => ({
       slug: r.slug, title: r.title, topic: r.topic, language: r.language,
-      host_name: names[r.host_id] ?? 'User',
-      audience: (await listParticipants(r.slug)).length,
-    }))),
+      host_name: names[r.host_id] ?? 'User', host_avatar_url: photos.get(r.host_id),
+      audience: live[i].length,
+      speakers: speakerIds[i].map((id: string) => ({ id, name: names[id] ?? 'User', avatar_url: photos.get(id) ?? null })),
+    })),
   };
 });
 

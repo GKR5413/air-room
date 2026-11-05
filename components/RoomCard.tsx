@@ -1,48 +1,39 @@
 import type { CSSProperties } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, Globe, Headphones } from 'lucide-react';
+import { Headphones } from 'lucide-react';
 import Avatar from './Avatar';
-import { glowHue, languageName } from '@/lib/format';
 
 export type RoomItem = {
-  slug: string; title: string; topic: string; language: string; host_name: string; audience: number;
+  slug: string; title: string; topic: string; language: string; host_name: string; host_avatar_url?: string | null; audience: number;
+  /** People on stage right now, host first. */
+  speakers?: { id: string; name: string; avatar_url?: string | null }[];
 };
 
-/** A live room in the Explore grid. With `preview`, it renders as a non-interactive sample. */
-export default function RoomCard({ room, index = 0, preview = false }: { room: RoomItem; index?: number; preview?: boolean }) {
-  const style = { '--h': glowHue(room.slug || room.title), '--d': index } as CSSProperties;
-  const body = (
-    <>
-      <div className="rc-top">
-        <span className="live-badge">Live</span>
-        <span className="rc-listeners" title="Listening now">
-          <span className="eq" aria-hidden="true"><i /><i /><i /><i /></span>
+/** A live room in the home feed: title and host on the left, who's speaking on the right. */
+export default function RoomCard({ room, index = 0 }: { room: RoomItem; index?: number }) {
+  const all = (room.speakers?.length ? room.speakers : [{ id: 'host', name: room.host_name, avatar_url: room.host_avatar_url }]).slice(0, 4);
+  // The "+N" bubble takes the last slot when there are more people than faces.
+  const faces = room.audience > all.length && all.length === 4 ? all.slice(0, 3) : all;
+  const more = Math.max(0, room.audience - faces.length);
+  return (
+    <Link href={`/r/${room.slug}`} className="feed-card rise" style={{ animationDelay: `${index * 40}ms` } as CSSProperties}>
+      <div className="fc-main">
+        <div className="fc-host">
+          <Avatar name={room.host_name || '?'} src={room.host_avatar_url} size={24} />
+          <span>{room.host_name}</span>
+        </div>
+        <h3 className="fc-title">{room.title || 'Untitled room'}</h3>
+        <p className="fc-meta">
           <Headphones size={14} aria-hidden="true" />
-          <b>{room.audience}</b><span className="sr-only"> listening</span>
-        </span>
+          <span>{room.audience}<span className="sr-only"> listening</span></span>
+          {room.topic && <><i aria-hidden="true">·</i><span>{room.topic}</span></>}
+        </p>
       </div>
 
-      <h3 className="rc-title">{room.title || 'Untitled room'}</h3>
-
-      <div className="rc-host">
-        <Avatar name={room.host_name || '?'} size={36} />
-        <div>
-          <div className="rc-host-name">{room.host_name}</div>
-          <div className="rc-host-role">Host</div>
-        </div>
+      <div className={`fc-faces n${faces.length + (more > 0 ? 1 : 0)}`} aria-hidden="true">
+        {faces.map(f => <Avatar key={f.id} className="fc-face" name={f.name} src={f.avatar_url} size={54} />)}
+        {more > 0 && <span className="fc-face fc-more">+{more}</span>}
       </div>
-
-      <div className="rc-foot">
-        <div className="rc-chips">
-          {room.topic && <span className="chip">{room.topic}</span>}
-          {room.language && <span className="chip"><Globe aria-hidden="true" />{languageName(room.language)}</span>}
-        </div>
-        {!preview && <span className="rc-go" aria-hidden="true"><ArrowUpRight size={18} /></span>}
-      </div>
-    </>
+    </Link>
   );
-
-  return preview
-    ? <div className="room-card is-preview" style={style}>{body}</div>
-    : <Link href={`/r/${room.slug}`} className="room-card rise" style={style}>{body}</Link>;
 }

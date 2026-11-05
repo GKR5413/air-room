@@ -4,6 +4,7 @@ import { getRoomBySlug, getRole, isMod, isBanned, setRole, logAction } from '@/l
 import { setParticipantRole, muteParticipant, kick } from '@/lib/livekit';
 import { body, requireLive, isGuestId, isUuid, transferHost } from '@/lib/api';
 import type { ModAction } from '@/lib/types';
+import { reconcileRoom } from '@/lib/room-lifecycle';
 
 const ACTIONS: ModAction[] = ['invite', 'dismiss_hand', 'mute', 'to_audience', 'remove', 'appoint_mod', 'remove_mod', 'transfer_host', 'pause_hands', 'resume_hands'];
 
@@ -95,5 +96,6 @@ export const POST = route<{ params: Promise<{ slug: string }> }>(async (req, { p
     }
   }
   await logAction(room.id, u.id, isGuestId(target) ? null : target, action);
+  if (action === 'to_audience' || action === 'remove') await reconcileRoom(room);
   return { ok: true };
 });

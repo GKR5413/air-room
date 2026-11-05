@@ -1,21 +1,26 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CircleAlert, CircleCheck, Eye, EyeOff, Lock, LogOut, Mail, UserRound } from 'lucide-react';
+import { CircleAlert, CircleCheck, Eye, EyeOff, Lock, LogOut, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase-browser';
 import Avatar from '@/components/Avatar';
-import { LogoMark } from '@/components/Logo';
+import { authErrorMessage } from '@/lib/auth-errors';
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [mode, setMode] = useState<'in' | 'up'>('in');
   const [msg, setMsg] = useState('');
   const [signedIn, setSignedIn] = useState<string | null>(null);
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
+  function showError(error: { code?: string; status?: number; message?: string }) {
+    const result = authErrorMessage(error);
+    setMsg(result.message);
+  }
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setSignedIn(data.user?.email ?? null));
@@ -23,18 +28,25 @@ export default function Login() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
+    const signup = mode === 'up';
     setMsg('');
+    if (signup && password !== confirm) { submitting.current = false; return setMsg('Passwords do not match.'); }
     setBusy(true);
     try {
-      const res = mode === 'up'
-        ? await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName } } })
-        : await supabase.auth.signInWithPassword({ email, password });
-      if (res.error) return setMsg(res.error.message);
-      if (mode === 'up' && !res.data.session) return setMsg('Check your email to confirm your account, then sign in.');
+      const res = signup
+        ? await supabase.auth.signUp({ email: email.trim(), password })
+        : await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (res.error) return showError(res.error);
+      if (signup && !res.data.session) {
+        return setMsg('Check your email to confirm your account, then sign in. Check your spam folder too.');
+      }
       router.push('/');
     } catch (err: any) {
-      setMsg(err?.message || 'Something went wrong. Please try again.');
+      showError(err ?? {});
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
@@ -50,18 +62,7 @@ export default function Login() {
 
   return (
     <main className="auth">
-      <aside className="auth-art" aria-hidden="true">
-        <div className="auth-art-inner">
-          <LogoMark size={44} />
-          <h2 className="display">Your voice,<br />in the <em>air</em>.</h2>
-          <p className="muted">Join thousands of live conversations, or open one of your own in a single tap.</p>
-        </div>
-        <div className="wave big">
-          {Array.from({ length: 34 }, (_, i) => <i key={i} style={{ '--i': i } as React.CSSProperties} />)}
-        </div>
-      </aside>
-
-      <section className="auth-panel">
+      <section>
         <div className="auth-card rise">
           {signedIn && (
             <div className="account-strip">
@@ -74,29 +75,15 @@ export default function Login() {
             </div>
           )}
 
-          <div>
-            <h1 className="display auth-title">{isUp ? 'Create your account' : 'Welcome back'}</h1>
-            <p className="muted" style={{ marginTop: 8 }}>
-              {isUp ? 'Pick a display name and you’re ready to host and speak.' : 'Sign in to host rooms, raise your hand and join the stage.'}
-            </p>
-          </div>
+          <h1 className="sr-only">{isUp ? 'Create account' : 'Sign in'}</h1>
 
           <div className="segmented" style={{ '--n': 2, '--i': isUp ? 1 : 0 } as React.CSSProperties} role="group" aria-label="Account mode">
             <span className="segmented-thumb" />
-            <button type="button" aria-pressed={!isUp} onClick={() => { setMode('in'); setMsg(''); }}>Sign in</button>
-            <button type="button" aria-pressed={isUp} onClick={() => { setMode('up'); setMsg(''); }}>Sign up</button>
+            <button type="button" disabled={busy} aria-pressed={!isUp} onClick={() => { setMode('in'); setMsg(''); }}>Sign in</button>
+            <button type="button" disabled={busy} aria-pressed={isUp} onClick={() => { setMode('up'); setMsg(''); }}>Sign up</button>
           </div>
 
           <form onSubmit={submit} className="stack">
-            {isUp && (
-              <div className="field">
-                <label className="label" htmlFor="dn">Display name</label>
-                <div className="input-wrap">
-                  <UserRound className="lead" />
-                  <input id="dn" className="input" value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="How should we call you?" autoComplete="nickname" required />
-                </div>
-              </div>
-            )}
             <div className="field">
               <label className="label" htmlFor="em">Email</label>
               <div className="input-wrap">
@@ -105,7 +92,7 @@ export default function Login() {
               </div>
             </div>
             <div className="field">
-              <label className="label" htmlFor="pw">Password <span className="opt">{isUp ? 'At least 6 characters' : ''}</span></label>
+              <label className="label" htmlFor="pw">Password{isUp && <span className="opt">6+ characters</span>}</label>
               <div className="input-wrap">
                 <Lock className="lead" />
                 <input id="pw" className="input" type={show ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" autoComplete={isUp ? 'new-password' : 'current-password'} required minLength={6} />
@@ -114,6 +101,18 @@ export default function Login() {
                 </button>
               </div>
             </div>
+            {isUp && (
+              <div className="field">
+                <label className="label" htmlFor="pw2">Retype password</label>
+                <div className="input-wrap">
+                  <Lock className="lead" />
+                  <input id="pw2" className="input" type={show ? 'text' : 'password'} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" autoComplete="new-password" required minLength={6} aria-describedby="pw2-hint" />
+                </div>
+                <small id="pw2-hint" className={`hint match ${confirm ? (confirm === password ? 'ok' : 'bad') : ''}`} aria-live="polite">
+                  {confirm ? (confirm === password ? 'Passwords match' : 'Passwords don’t match yet') : ' '}
+                </small>
+              </div>
+            )}
 
             {msg && (
               <div className={`alert ${infoMsg ? 'alert-ok' : 'alert-error'}`} role="alert">
@@ -127,9 +126,9 @@ export default function Login() {
           </form>
 
           <p className="auth-switch muted">
-            {isUp ? 'Have an account?' : 'Need an account?'}{' '}
-            <button type="button" className="link-btn" onClick={() => { setMode(isUp ? 'in' : 'up'); setMsg(''); }}>
-              {isUp ? 'Sign in' : 'Sign up'}
+            {isUp ? 'Already have an account?' : 'New here?'}{' '}
+            <button type="button" className="link-btn" disabled={busy} onClick={() => { setMode(isUp ? 'in' : 'up'); setMsg(''); }}>
+              {isUp ? 'Sign in' : 'Create one'}
             </button>
           </p>
         </div>

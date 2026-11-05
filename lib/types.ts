@@ -14,13 +14,17 @@ export interface Identity { id: string; name: string; isGuest: boolean }
 
 export interface JoinResponse { token: string; url: string; role: Role }
 
-export interface StageMember { id: string; name: string; role: Role; muted: boolean; speaking: boolean }
+export interface StageMember { avatar_url?: string | null; username?: string | null; id: string; name: string; role: Role; muted: boolean; speaking: boolean }
+
+export interface Person { id: string; name: string; avatar_url?: string | null; username?: string | null }
 
 export interface RoomState {
   room: { slug: string; title: string; description: string; topic: string; language: string;
           visibility: Visibility; status: RoomStatus; hands_enabled: boolean; host_name: string };
   me: { id: string; role: Role; isGuest: boolean; handPending: boolean; invitationId: string | null };
   stage: StageMember[];
+  /** Signed-in people just listening. Guests are only part of audienceCount. */
+  listeners: Person[];
   audienceCount: number;
   hands: { userId: string; name: string; createdAt: string }[]; // only for host/moderator, else []
 }

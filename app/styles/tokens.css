@@ -1,27 +1,29 @@
 /* ───────────────────────────────────────────────────────────
-   AirRoom design tokens — "late-night radio"
-   Warm ink in the dark, cream paper in the light, one coral
-   "on-air" signal colour. Theme follows the system unless the
-   user picks one (html[data-theme]).
+   AirRoom design tokens.
+   Deep slate surfaces, one bright blue accent, rounded type and
+   squircle avatars. Theme follows the system unless the user picks
+   one (html[data-theme]).
    ─────────────────────────────────────────────────────────── */
 
 :root {
-  --font-ui: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: var(--font-serif), "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-ui: var(--font-sans), ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-ui);
 
   --r-xs: 8px;
   --r-sm: 12px;
   --r-md: 16px;
-  --r-lg: 24px;
-  --r-xl: 32px;
+  --r-lg: 22px;
+  --r-xl: 28px;
   --r-pill: 999px;
+  --r-avatar: 36%;
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
 
-  --nav-h: 68px;
-  --maxw: 1200px;
-  --gutter: clamp(16px, 4vw, 40px);
+  --nav-h: 64px;
+  --tab-h: 64px;
+  --maxw: 680px;
+  --gutter: clamp(16px, 4vw, 24px);
 }
 
 /* Dark is the default */
@@ -29,112 +31,103 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #0d0b09;
-  --bg-soft: #13100d;
-  --surface: #181410;
-  --surface-2: #211b15;
-  --surface-3: #2b241c;
-  --line: rgb(255 238 214 / 0.09);
-  --line-strong: rgb(255 238 214 / 0.18);
+  --bg: #1b1c20;
+  --bg-soft: #202126;
+  --surface: #26272c;
+  --surface-2: #2e2f35;
+  --surface-3: #3b3c43;
+  --line: rgb(255 255 255 / 0.07);
+  --line-strong: rgb(255 255 255 / 0.16);
 
-  --text: #f6f0e5;
-  --text-2: #c2b7a5;
-  --text-3: #9a8f7d;
+  --text: #f5f5f7;
+  --text-2: #aaabb3;
+  --text-3: #80818b;
 
-  --accent: #ff5b3a;
-  --accent-hi: #ff7a52;
-  --accent-text: #ff8a68;
-  --on-accent: #1d0c06;
-  --amber: #ffb43c;
-  --teal: #38d2b4;
+  --accent: #1a8cff;
+  --accent-hi: #3d9eff;
+  --accent-text: #62b2ff;
+  --on-accent: #ffffff;
+  --leave: #f2733d;
+  --live: #ff5c5c;
+  --gold: #f6b83d;
 
-  --ok: #5fd89c;
-  --warn: #ffc55a;
-  --danger: #ff7272;
+  --ok: #2fbf71;
+  --warn: #f6b83d;
+  --danger: #f26b6b;
 
-  --focus: #ffb29c;
-  --scrim: rgb(6 4 2 / 0.66);
-  --grain: 0.07;
-  --glow-a: 0.2;
-  --glow-b: 0.12;
+  --focus: #62b2ff;
+  --scrim: rgb(0 0 0 / 0.6);
 
-  --shadow-1: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 10px 30px -14px rgb(0 0 0 / 0.7);
-  --shadow-2: 0 30px 70px -24px rgb(0 0 0 / 0.8), 0 1px 0 rgb(255 255 255 / 0.05) inset;
-  --shadow-accent: 0 10px 30px -8px rgb(255 91 58 / 0.55);
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.25);
+  --shadow-2: 0 16px 44px -16px rgb(0 0 0 / 0.7);
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     color-scheme: light;
 
-    --bg: #f6f1e7;
-    --bg-soft: #efe8da;
-    --surface: #fffcf6;
-    --surface-2: #f3ece0;
-    --surface-3: #e9dfcd;
-    --line: rgb(52 36 12 / 0.1);
-    --line-strong: rgb(52 36 12 / 0.2);
+    --bg: #f2f3f6;
+    --bg-soft: #eceef2;
+    --surface: #ffffff;
+    --surface-2: #f1f2f5;
+    --surface-3: #e3e5ea;
+    --line: rgb(0 0 0 / 0.07);
+    --line-strong: rgb(0 0 0 / 0.16);
 
-    --text: #1d1710;
-    --text-2: #51473a;
-    --text-3: #6f6554;
+    --text: #17181c;
+    --text-2: #565861;
+    --text-3: #777a84;
 
-    --accent: #d93a17;
-    --accent-hi: #e8491f;
-    --accent-text: #bf3210;
+    --accent: #0a7cf2;
+    --accent-hi: #006add;
+    --accent-text: #0a66cc;
     --on-accent: #ffffff;
-    --amber: #e88a00;
-    --teal: #0f9f86;
+    --leave: #d9561f;
+    --live: #d92d2d;
+    --gold: #c68a00;
 
-    --ok: #157f50;
-    --warn: #8f5a00;
-    --danger: #c42d2d;
+    --ok: #14894f;
+    --warn: #b57a00;
+    --danger: #d12c2c;
 
-    --focus: #d93a17;
-    --scrim: rgb(40 28 10 / 0.5);
-    --grain: 0.1;
-    --glow-a: 0.16;
-    --glow-b: 0.14;
+    --focus: #0a7cf2;
+    --scrim: rgb(20 22 30 / 0.4);
 
-    --shadow-1: 0 1px 0 rgb(255 255 255 / 0.8) inset, 0 10px 28px -16px rgb(80 50 10 / 0.35);
-    --shadow-2: 0 30px 60px -26px rgb(80 50 10 / 0.45), 0 1px 0 rgb(255 255 255 / 0.8) inset;
-    --shadow-accent: 0 10px 26px -8px rgb(217 58 23 / 0.5);
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.06);
+    --shadow-2: 0 16px 44px -18px rgb(20 30 60 / 0.28);
   }
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg: #f6f1e7;
-  --bg-soft: #efe8da;
-  --surface: #fffcf6;
-  --surface-2: #f3ece0;
-  --surface-3: #e9dfcd;
-  --line: rgb(52 36 12 / 0.1);
-  --line-strong: rgb(52 36 12 / 0.2);
+  --bg: #f2f3f6;
+  --bg-soft: #eceef2;
+  --surface: #ffffff;
+  --surface-2: #f1f2f5;
+  --surface-3: #e3e5ea;
+  --line: rgb(0 0 0 / 0.07);
+  --line-strong: rgb(0 0 0 / 0.16);
 
-  --text: #1d1710;
-  --text-2: #51473a;
-  --text-3: #6f6554;
+  --text: #17181c;
+  --text-2: #565861;
+  --text-3: #777a84;
 
-  --accent: #d93a17;
-  --accent-hi: #e8491f;
-  --accent-text: #bf3210;
+  --accent: #0a7cf2;
+  --accent-hi: #006add;
+  --accent-text: #0a66cc;
   --on-accent: #ffffff;
-  --amber: #e88a00;
-  --teal: #0f9f86;
+  --leave: #d9561f;
+  --live: #d92d2d;
+  --gold: #c68a00;
 
-  --ok: #157f50;
-  --warn: #8f5a00;
-  --danger: #c42d2d;
+  --ok: #14894f;
+  --warn: #b57a00;
+  --danger: #d12c2c;
 
-  --focus: #d93a17;
-  --scrim: rgb(40 28 10 / 0.5);
-  --grain: 0.1;
-  --glow-a: 0.16;
-  --glow-b: 0.14;
+  --focus: #0a7cf2;
+  --scrim: rgb(20 22 30 / 0.4);
 
-  --shadow-1: 0 1px 0 rgb(255 255 255 / 0.8) inset, 0 10px 28px -16px rgb(80 50 10 / 0.35);
-  --shadow-2: 0 30px 60px -26px rgb(80 50 10 / 0.45), 0 1px 0 rgb(255 255 255 / 0.8) inset;
-  --shadow-accent: 0 10px 26px -8px rgb(217 58 23 / 0.5);
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.06);
+  --shadow-2: 0 16px 44px -18px rgb(20 30 60 / 0.28);
 }
